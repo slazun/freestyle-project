@@ -90,6 +90,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# ignore secret environment variable values in the ".env" file:
+.env
+
 # Spyder project settings
 .spyderproject
 .spyproject
