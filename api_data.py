@@ -26,9 +26,14 @@ my_keys = parsed_response.keys() #to do: sort to ensure latest date is first
 tables = list(my_keys) #need to reference first in list as most recent date
 print(tables) # metadata and results
 print(type(parsed_response['results'])) #list
-print(parsed_response['results'][0])
-print(type(parsed_response['results'][0])) 
-subresults = parsed_response['results'][0]
+print(parsed_response['results'][0]) 
+print(type(parsed_response['results'][0])) #dictionary 
+subresults = parsed_response['results'][0] 
 sub_keys = subresults.keys()
-sub_tables = list(sub_keys)
-print(sub_tables)
+sub_tables = list(sub_keys) 
+print(sub_tables) # years 1996-2017
+print(type(subresults['2017'])) #dict
+latest_year = subresults['2017']
+year_keys = latest_year.keys()
+year_tables = list(year_keys)
+print(year_tables) #'completion', 'earnings', 'cost', 'student', 'academics', 'admissions', 'aid', 'repayment'
