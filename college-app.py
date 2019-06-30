@@ -14,7 +14,17 @@ load_dotenv()
 
 api_key = os.environ.get("SCORECARD_API_KEY")
 
+#introducing app to the user
 
+print("Welcome to the College Diversity Evaluator. This tool allows you to assess a school's level of diversity on different facotrs or find a school that's right for you.")
+school_search =input("Are you looking to evaluate a specific school? Please enter 'Yes' or 'No': ")
+if school_search == 'Yes':
+    input("Please enter the name of the college you are looking to evaluate:")
+elif school_search == 'No':
+    pass
+else:
+    print("That input is not valid. Please try again with 'Yes' or 'No'.")
+    exit()
 
 
 #restrict api call to eligible colleges in the url parameters. restrict the number of fields returned 
