@@ -14,12 +14,15 @@ load_dotenv()
 
 api_key = os.environ.get("SCORECARD_API_KEY")
 
+
+
+
 #restrict api call to eligible colleges in the url parameters. restrict the number of fields returned 
-requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.main_campus=1&school.operating=1&_fields=school.name,school.city,school.state,2017.student.size,2017.admissions.sat_scores.average.overall,2017.cost.tuition.in_state,2017.cost.tuition.out_of_state,2017.aid.median_debt_suppressed.completers.overall,2017.student.demographics.female_share,2017.student.demographics.race_ethnicity.white_2000,2017.student.demographics.first_generation,2017.student.demographics.veteran"
+requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name=Harvard&school.main_campus=1&school.operating=1&_fields=school.name,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
 response = requests.get(requests_url)
 print(type(response)) #<class 'requests.models.Response'> its a string and need to use json module to treat as dictionary
 print(response.status_code)
-#print(response.text)
+print(response.text)
 if response.status_code != 200:
     print("Sorry we have encountered an error with the data request. Please try again.")
     exit()
