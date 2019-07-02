@@ -5,6 +5,8 @@ import os
 import requests
 import csv
 import emoji
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 def to_usd(my_price):
     return "${0:,.2f}".format(my_price)
@@ -13,13 +15,15 @@ load_dotenv()
 # Need to securely input API credentials. using API guidance from this repo https://github.com/RTICWDT/open-data-maker/blob/master/API.md
 
 api_key = os.environ.get("SCORECARD_API_KEY")
+SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
+MY_ADDRESS = os.environ.get("MY_EMAIL_ADDRESS")
 
 #introducing app to the user. leaarn if they are evaluating a college or searchong for one
 
 print("Welcome to the 'Real Talk' College Evaluator. This tool allows you to find a school that what aligns with you on what matters most...and tells you if it's realistic.")
 school_search =input("Are you looking to evaluate a specific school? Please enter 'Yes' or 'No': ")
 if school_search == 'Yes':
-    school_name = input("Please enter the name of the college you are looking to evaluate:")
+    school_name = input("Please enter the name of the college you are looking to evaluate: ")
     requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name={school_name}&school.main_campus=1&school.operating=1&_fields=school.name,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
 elif school_search == 'No': #remove school name as an input in url
     requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.main_campus=1&school.operating=1&_fields=school.name,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
@@ -83,13 +87,14 @@ print(type(parsed_response['results'][0])) #dictionary
 #Output for single college search. Basic Info. Source credit: robo advisor project
 
 print("-------------------------")
+print(THE BASICS:)
 print("POTENTIAL COLLEGE:" + " " + str(school_name))
 print("COLLEGE LOCATION:"+ " " + str(parsed_response['results'][0]['school.city'])+ ", " +str(parsed_response['results'][0]['school.state']))
 print("STUDENT POPULATION SIZE:" + " " + str(parsed_response['results'][0]['latest.student.size']))
 print("-------------------------")
 
 #Assessing if attendance is realistic
-
+print("HOW YOU MATCH UP:")
 if student_state == parsed_response['results'][0]['school.state']:
     tuition = parsed_response['results'][0]['latest.cost.tuition.in_state']
 else:
@@ -111,7 +116,7 @@ elif avg_SAT_score <= (int(SAT_score) + 50):
 else:
     pass
 print("-------------------------")
-
+print("THINGS TO NOTE:")
 #Giving feedback on the diversity of the institution
 
 percent_female = float(parsed_response['results'][0]['latest.student.demographics.female_share'])
@@ -130,7 +135,7 @@ percent_white_modified = percent_white * 100
 if percent_white > float(avg_percent_white):
     print("RACIAL & ETHINIC DIVERSITY:" + " " + "This school is not very diverse." + " " + emoji.emojize(":thumbs_down:"))
 elif 0.45 <= percent_white <= float(avg_percent_white):
-    print("RACIAL & ETHINIC DIVERSITY:"  + " " + "This school is moderately diverse." + " " +emoji.emojize(":simple_smile:"))
+    print("RACIAL & ETHINIC DIVERSITY:"  + " " + "This school is moderately diverse." + " " +emoji.emojize(":relieved_smile:"))
 else:
     print("RACIAL & ETHINIC DIVERSITY:"  + " " + "This school is very diverse." + " " +emoji.emojize(":thumbs_up:"))
 
@@ -138,11 +143,11 @@ percent_first_gen = float(parsed_response['results'][0]['latest.student.demograp
 percent_first_gen_modified = percent_first_gen * 100
 
 if percent_first_gen > float(avg_percent_first_gen):
-    print("PERCENT FIRST GEN:" + " " + str(round(percent_first_gen_modified,2))+ "% "+ "This school has a large population of first gen students" + " " + emoji.emojize(":thumbs_up:"))
+    print("PERCENT FIRST GEN:" + " " + str(round(percent_first_gen_modified,2))+ "% "+ "This school has a large population of first generation students." + " " + emoji.emojize(":thumbs_up:"))
 elif 0.2 <= percent_first_gen <= float(avg_percent_first_gen):
-    print("PERCENT FIRST GEN:"  + " " + str(round(percent_first_gen_modified,2))+ "% "+ "This school has an average amount of first gen students." + " " +emoji.emojize(":relieved_face:"))
+    print("PERCENT FIRST GEN:"  + " " + str(round(percent_first_gen_modified,2))+ "% "+ "This school has an average amount of first generation students." + " " +emoji.emojize(":relieved_face:"))
 else:
-    print("PERCENT FIRST GEN"  + " " + str(round(percent_first_gen_modified,2))+ "% " +"This school does not have many first gen students." + " " +emoji.emojize(":thumbs_down:"))
+    print("PERCENT FIRST GEN"  + " " + str(round(percent_first_gen_modified,2))+ "% " +"This school does not have many first generations students." + " " +emoji.emojize(":thumbs_down:"))
 
 if parsed_response['results'][0]['latest.student.demographics.veteran'] == None:
     pass
@@ -151,10 +156,13 @@ else:
     percent_vet_modified = percent_vet * 100
 
     if percent_vet > float(avg_percent_veteran):
-        print("PERCENT FIRST GEN:" + " " + str(round(percent_vet_modified,2))+ "% "+ "This school has a large population of first gen students" + " " + emoji.emojize(":thumbs_up:"))
+        print("PERCENT VETERAN:" + " " + str(round(percent_vet_modified,2))+ "% "+ "This school has a large population of veterans." + " " + emoji.emojize(":thumbs_up:"))
     elif 0.025 <= percent_vet <= float(avg_percent_veteran):
-        print("PERCENT FIRST GEN:"  + " " + str(round(percent_vet_modified,2))+ "% "+ "This school has an average amount of first gen students." + " " +emoji.emojize(":relieved_face:"))
+        print("PERCENT VETERAN:"  + " " + str(round(percent_vet_modified,2))+ "% "+ "This school has an average amount of veterans." + " " +emoji.emojize(":relieved_face:"))
     else:
-        print("PERCENT FIRST GEN"  + " " + str(round(percent_vet_modified,2))+ "% " +"This school does not have many first gen students." + " " +emoji.emojize(":thumbs_down:"))
+        print("PERCENT VETERAN"  + " " + str(round(percent_vet_modified,2))+ "% " +"This school does not have many veterans." + " " +emoji.emojize(":thumbs_down:"))
 
 print("-------------------------")
+
+
+
