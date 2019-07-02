@@ -29,11 +29,30 @@ else:
     exit()
 
 #Defining user restrictions
+# emoji credit to https://stackoverflow.com/questions/40446784/display-emoji-in-pythons-console and https://www.geeksforgeeks.org/python-program-to-print-emojis/
 
 print("Awesome! Please help us determine if this is a realistic fit for you.")
 student_state = input("What state do you live in? Please use a state abbreviation like 'PA':")
-budget = input("Do you have a")
+
+budget = input("Do you have a budget restriction? Please enter 'Yes' or 'No':") 
+if budget == 'Yes':
+    budget_amount = input("Please input a max yearly tuition amount like '50000':") #TODO make tuition number user friendly
+elif budget == 'No':
+    print("LUCKY YOU!" + " " + emoji.emojize(":clap:"))
+    budget_amount == 10000000000000
+else:
+    print("Sorry that is an inalid input. Please try again with 'Yes' or 'No'.")
+    exit()
+
 SAT_score = input("What is your SAT score out of 1600? If you don't mind me asking... :")
+
+#Defining benchmarks https://www.census.gov/library/visualizations/2018/comm/classroom-diversity.html
+
+avg_percent_white == 0.547 
+avg_percent_female == 0.559
+avg_percent_first_gen = 0.3 #source http://www.firstgenerationfoundation.org/
+avg_percent_veteran = 0.04 #source https://www.acenet.edu/the-presidency/columns-and-features/Pages/By-the-Numbers-Undergraduate-Student-Veterans.aspx
+
 
 #restrict api call to eligible colleges in the url parameters. restrict the number of fields returned 
 #requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name={school_name}&school.main_campus=1&school.operating=1&_fields=school.name,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
@@ -61,12 +80,14 @@ print(type(parsed_response['results'][0])) #dictionary
 print("-------------------------")
 print("POTENTIAL COLLEGE:" + " " + str(school_name))
 print("COLLEGE LOCATION:"+ " " + str(parsed_response['results'][0]['school.city'])+ ", " +str(parsed_response['results'][0]['school.state']))
-print("STUDENT POPULATION SIZE:" + " " + str(parsed_response['results'][0]['latest.student.size']))
+print("STUDENT POPULATION SIZE:" + " " + str(parsed_response['results'][0]['latest.student.size']) + " " + emoji.emojize(":grimacing_face:"))
 if student_state == parsed_response['results'][0]['school.state']:
     tuition = parsed_response['results'][0]['latest.cost.tuition.in_of_state']
 else:
     tuition = parsed_response['results'][0]['latest.cost.tuition.out_of_state']
 
+if float(tuition) > float(budget_amount):
+    print("TUITION IS:" + " " + str(to_usd(float(latest_close))+ ". " + "" )
 
 
 #print("REQUEST AT: " + " " + now.strftime("%Y-%m-%d %H:%M:%S"))
