@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 import json
 import os
 import requests
-import datetime
 import csv
 import emoji
 
@@ -32,19 +31,25 @@ else:
 # emoji credit to https://stackoverflow.com/questions/40446784/display-emoji-in-pythons-console and https://www.geeksforgeeks.org/python-program-to-print-emojis/
 
 print("Awesome! Please help us determine if this is a realistic fit for you.")
-student_state = input("What state do you live in? Please use a state abbreviation like 'PA':")
+student_state = input("What state do you live in? Please use a state abbreviation like 'PA': ")
 
-budget = input("Do you have a budget restriction? Please enter 'Yes' or 'No':") 
+budget = input("Do you have a budget restriction? Please enter 'Yes' or 'No': ") 
 if budget == 'Yes':
-    budget_amount = input("Please input a max yearly tuition amount like '50000':") #TODO make tuition number user friendly
+    budget_amount = input("Please input a max yearly tuition amount like '50000': ") #TODO make tuition number user friendly
 elif budget == 'No':
     print("LUCKY YOU!" + " " + emoji.emojize(":expressionless_face:"))
     budget_amount = 10000000000000
 else:
-    print("Sorry that is an inalid input. Please try again with 'Yes' or 'No'.")
+    print("Sorry that is an invalid input. Please try again with 'Yes' or 'No'.")
     exit()
 
-SAT_score = input("What is your SAT score out of 1600? If you don't mind me asking... :")
+SAT_score = input("What is your SAT score out of 1600? If you don't mind me asking... : ")
+
+if int(SAT_score) <= 1600:
+    pass
+else:
+    print("Sorry that is an invalid input. Please enter a value less than or equal to 1600.")
+    SAT_score = input("What is your SAT score out of 1600? If you don't mind me asking... : ")
 
 #Defining benchmarks https://www.census.gov/library/visualizations/2018/comm/classroom-diversity.html
 
@@ -91,9 +96,9 @@ else:
     tuition = parsed_response['results'][0]['latest.cost.tuition.out_of_state']
 
 if float(tuition) > float(budget_amount):
-    print("YEARLY TUITION:" + " " + str(to_usd(float(tuition)))+ ". " + "This school is outside of your budget." + " " + emoji.emojize(":worried_face:"))
+    print("YEARLY TUITION:" + " " + str(to_usd(float(tuition)))+ " " + "This school is outside of your budget." + " " + emoji.emojize(":worried_face:"))
 elif float(tuition) <= float(budget_amount):
-    print("YEARLY TUITION:" + " " + str(to_usd(float(tuition)))+ ". " + " " + emoji.emojize(":money_with_wings:"))
+    print("YEARLY TUITION:" + " " + str(to_usd(float(tuition)))+ " " + " " + emoji.emojize(":money_with_wings:"))
 else:
     pass
 
@@ -129,24 +134,27 @@ elif 0.45 <= percent_white <= float(avg_percent_white):
 else:
     print("RACIAL & ETHINIC DIVERSITY:"  + " " + "This school is very diverse." + " " +emoji.emojize(":thumbs_up:"))
 
+percent_first_gen = float(parsed_response['results'][0]['latest.student.demographics.first_generation'])
+percent_first_gen_modified = percent_first_gen * 100
 
+if percent_first_gen > float(avg_percent_first_gen):
+    print("PERCENT FIRST GEN:" + " " + str(round(percent_first_gen_modified,2))+ "% "+ "This school has a large population of first gen students" + " " + emoji.emojize(":thumbs_up:"))
+elif 0.2 <= percent_first_gen <= float(avg_percent_first_gen):
+    print("PERCENT FIRST GEN:"  + " " + str(round(percent_first_gen_modified,2))+ "% "+ "This school has an average amount of first gen students." + " " +emoji.emojize(":relieved_face:"))
+else:
+    print("PERCENT FIRST GEN"  + " " + str(round(percent_first_gen_modified,2))+ "% " +"This school does not have many first gen students." + " " +emoji.emojize(":thumbs_down:"))
 
+if parsed_response['results'][0]['latest.student.demographics.veteran'] == None:
+    pass
+else:
+    percent_vet = float(parsed_response['results'][0]['latest.student.demographics.veteran'])
+    percent_vet_modified = percent_vet * 100
 
-#print("REQUEST AT: " + " " + now.strftime("%Y-%m-%d %H:%M:%S"))
-#print("-------------------------")
-#print("LATEST DAY:" + " " + str(last_refreshed))
-#print("LATEST CLOSE:" + " " + str(to_usd(float(latest_close)))) #need to convert string to float to use usd function
-#print("RECENT HIGH:" + " " + str(to_usd(float(recent_high)))) 
-#print("RECENT LOW:" + " " + str(to_usd(float(recent_low)))) 
-#print("-------------------------")
-#if float(latest_close) > float(recent_high):
-    #print("RECOMMENDATION: SELL\nRECOMMENDATION REASON: Latest close is greater than recent highs. Don't you like money?") #https://stackoverflow.com/questions/34980251/how-to-print-multiple-lines-of-text-with-python
-#elif float(latest_close) < float(recent_low):
-    #print("RECOMMENDATION: BUY\nRECOMMENDATION REASON: Latest close is less than recent lows. Don't you like money?")
-#else: 
-    #print("RECOMMENDATION: HOLD\nRECOMMENDATION REASON: Data is inconclusive. We're feeling risk averse")
-#print("-------------------------")
-#print(f"WRITING DATA TO CSV: {csv_file_path}")
-#print("-------------------------")
-#print("HAPPY INVESTING!")
-#print("-------------------------")
+    if percent_vet > float(avg_percent_veteran):
+        print("PERCENT FIRST GEN:" + " " + str(round(percent_vet_modified,2))+ "% "+ "This school has a large population of first gen students" + " " + emoji.emojize(":thumbs_up:"))
+    elif 0.025 <= percent_vet <= float(avg_percent_veteran):
+        print("PERCENT FIRST GEN:"  + " " + str(round(percent_vet_modified,2))+ "% "+ "This school has an average amount of first gen students." + " " +emoji.emojize(":relieved_face:"))
+    else:
+        print("PERCENT FIRST GEN"  + " " + str(round(percent_vet_modified,2))+ "% " +"This school does not have many first gen students." + " " +emoji.emojize(":thumbs_down:"))
+
+print("-------------------------")
