@@ -26,9 +26,9 @@ school_search =input("Are you looking to evaluate a specific school? Please ente
 print(" ")
 if school_search == 'Yes':
     school_name = input("Please enter the name of the college you are looking to evaluate: ")
-    requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name={school_name}&school.main_campus=1&school.operating=1&_fields=school.name,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
+    requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name={school_name}&school.main_campus=1&school.operating=1&_fields=school.name,school.school_url,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
 elif school_search == 'No': #remove school name as an input in url
-    requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.main_campus=1&school.operating=1&_fields=school.name,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
+    requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.main_campus=1&school.operating=1&_fields=school.name,school.school_url,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
 else:
     print("That input is not valid. Please try again with 'Yes' or 'No'.")
     exit()
@@ -71,8 +71,8 @@ avg_percent_veteran = 0.04 #source https://www.acenet.edu/the-presidency/columns
 #requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name={school_name}&school.main_campus=1&school.operating=1&_fields=school.name,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
 response = requests.get(requests_url)
 #print(type(response)) #<class 'requests.models.Response'> its a string and need to use json module to treat as dictionary
-#print(response.status_code)
-#print(response.text)
+print(response.status_code)
+print(response.text)
 if response.status_code != 200:
     print("Sorry we have encountered an error with the data request. Please try again.")
     exit()
@@ -170,20 +170,51 @@ print(" ")
 
 if avg_SAT_score > (int(SAT_score) + 50):
     print("Looks like you need to get your scores up before applying. Let's try another college!")
+    exit()
 elif float(tuition) > float(budget_amount):
-    apply_anyway = input("This school is too exspensive... Apply anyway? Enter 'Yes' or 'No': ")
-        if apply_anyway == 'No':
-            exit()
-        elif apply_anyway == 'Yes':
-            pass
-        else:
-            print("Sorry that is an invalid input. Please try again with 'Yes' or 'No'.")
-            exit()
+    apply_anyway = input("This school is too expensive... Apply anyway? Enter 'Yes' or 'No': ")
+    if apply_anyway == 'No':
+        exit()
+    elif apply_anyway == 'Yes':
+        pass
+    else:
+        print("Sorry that is an invalid input. Please try again with 'Yes' or 'No'.")
+        exit()
 else:
     pass
 
+print(" ")
+get_reminder = input("Can we send you a gentle reminder to apply? Enter your email address to be our best friend or 'No' to break our hearts: ")
+
+school_url = parsed_response['results'][0]['school.school_url']
+print(school_url)
+
+if get_reminder == 'No':
+    print("Hope to see you soon!")
+    exit()
+else:
+    client = SendGridAPIClient(SENDGRID_API_KEY) #> <class 'sendgrid.sendgrid.SendGridAPIClient>
+    print("CLIENT:", type(client))
+    subject = f"Your Gentle Reminder...Apply to {school_name}!"
+    html_content = f"Hey there! Just a friendly reminder to apply to {school_name}. The application can be found here: {school_url}. You got this!"
+    #print("HTML:", html_content)
+    #print(get_reminder)
+    message = Mail(
+        from_email='sarah.lazun@gmail.com', 
+        to_emails=get_reminder, 
+        subject=subject, 
+        html_content=html_content)
+    try:
+        response = client.send(message)
+
+        print("RESPONSE:", type(response)) #> <class 'python_http_client.client.Response'>
+        print(response.status_code) #> 202 indicates SUCCESS
+        print(response.body)
+        print(response.headers)
+
+    except Exception as e:
+        print("OOPS", e.message)
 
 
-#
 
 
