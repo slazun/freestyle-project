@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import json
 import os
 import requests
-import csv
+import random
 import emoji
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
@@ -28,7 +28,7 @@ if school_search == 'Yes':
     school_name = input("Please enter the name of the college you are looking to evaluate: ")
     requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name={school_name}&school.main_campus=1&school.operating=1&_fields=school.name,school.school_url,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
 elif school_search == 'No': #remove school name as an input in url
-    requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.main_campus=1&school.operating=1&_fields=school.name,school.school_url,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
+    requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&_per_page=1000&school.main_campus=1&school.operating=1&_fields=school.name"
 else:
     print("That input is not valid. Please try again with 'Yes' or 'No'.")
     exit()
@@ -67,12 +67,10 @@ avg_percent_first_gen = 0.3 #source http://www.firstgenerationfoundation.org/
 avg_percent_veteran = 0.04 #source https://www.acenet.edu/the-presidency/columns-and-features/Pages/By-the-Numbers-Undergraduate-Student-Veterans.aspx
 
 
-#restrict api call to eligible colleges in the url parameters. restrict the number of fields returned 
-#requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name={school_name}&school.main_campus=1&school.operating=1&_fields=school.name,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
 response = requests.get(requests_url)
 #print(type(response)) #<class 'requests.models.Response'> its a string and need to use json module to treat as dictionary
-print(response.status_code)
-print(response.text)
+#print(response.status_code)
+#print(response.text)
 if response.status_code != 200:
     print("Sorry we have encountered an error with the data request. Please try again.")
     exit()
@@ -80,12 +78,34 @@ if response.status_code != 200:
 #move code over from api_data python code to evaluate results
 parsed_response = json.loads(response.text) #parsing string to dictionary
 #print(type(parsed_response)) #class dict
-my_keys = parsed_response.keys() #to do: sort to ensure latest date is first
-tables = list(my_keys) #need to referen
-#print(tables) 
+#my_keys = parsed_response.keys() #to do: sort to ensure latest date is first
+#tables = list(my_keys) #need to referen
+#print(tables)
+results_list = parsed_response['results']
+#print(results_list)
 #print(type(parsed_response['results'])) #list
 #print(parsed_response['results'][0]) 
 #print(type(parsed_response['results'][0])) #dictionary 
+
+#Output for single college search. Basic Info. Source credit: robo advisor project
+
+#if school name entered then evaluate else pick random school. source: https://github.com/prof-rossetti/nyu-info-2335-201905/blob/master/notes/python/modules/random.md
+
+if school_search == 'Yes':
+    pass
+else:
+    random_school = random.choice(results_list)
+    print(random_school)
+    school_name = random_school['school.name']
+    print(school_name)
+    requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name={school_name}&school.main_campus=1&school.operating=1&_fields=school.name,school.school_url,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
+    response = requests.get(requests_url)
+    if response.status_code != 200:
+        print("Sorry we have encountered an error with the data request. Please try again.")
+        exit()
+
+parsed_response = json.loads(response.text) #parsing string to dictionary
+
 
 #Output for single college search. Basic Info. Source credit: robo advisor project
 
@@ -187,8 +207,8 @@ print(" ")
 get_reminder = input("Can we send you a gentle reminder to apply? Enter your email address to be our best friend or 'No' to break our hearts: ")
 
 school_url = parsed_response['results'][0]['school.school_url']
-print(school_url)
 
+# source: https://github.com/prof-rossetti/nyu-info-2335-201905/blob/master/exercises/emails-with-templates/send_email.py
 if get_reminder == 'No':
     print("Hope to see you soon!")
     exit()
