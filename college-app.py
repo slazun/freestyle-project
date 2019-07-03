@@ -135,14 +135,14 @@ else:
     else:
         pass
 
-avg_SAT_score = int(parsed_response['results'][0]['latest.admissions.sat_scores.average.overall'])
+avg_SAT_score = parsed_response['results'][0]['latest.admissions.sat_scores.average.overall']
 
-if SAT_score == None:
+if avg_SAT_score == None:
     pass
 else:
-    if avg_SAT_score > (int(SAT_score) + 50):
+    if int(avg_SAT_score) > (int(SAT_score) + 50):
         print("AVERAGE SAT SCORE:" + " " + str(avg_SAT_score)+ " " + "You might want to take that test again..." + " " + emoji.emojize(":grimacing_face:"))
-    elif (int(SAT_score) - 50) <= avg_SAT_score <= (int(SAT_score) + 50):
+    elif (int(SAT_score) - 50) <= int(avg_SAT_score) <= (int(SAT_score) + 50):
         print("AVERAGE SAT SCORE:" + " " + str(avg_SAT_score) + " " + "Worth a shot!" + " " + emoji.emojize(":relieved_face:"))
     else:
         print("AVERAGE SAT SCORE:" + " " + str(avg_SAT_score) + " " + "You got this!" + " " + emoji.emojize(":relieved_face:"))
@@ -209,10 +209,10 @@ else:
     print("Sadly no information is available on the LGBTQ community or if the instition is accessible for persons with disabilities. "+emoji.emojize(":crying_face:"))
     print("-------------------------")
     print(" ")
-if SAT_score == None:
-    exit()
+if avg_SAT_score == None:
+   pass
 else:
-    if avg_SAT_score > (int(SAT_score) + 50):
+    if int(avg_SAT_score) > (int(SAT_score) + 50):
         print("Looks like you need to get your scores up before applying. Let's try another college!")
         exit()
     else:
@@ -261,7 +261,7 @@ else:
         print(" ")
 
         #print("RESPONSE:", type(response)) #> <class 'python_http_client.client.Response'>
-        print(response.status_code) #> 202 indicates SUCCESS
+        #print(response.status_code) #> 202 indicates SUCCESS
         #print(response.body)
         #print(response.headers)
 
