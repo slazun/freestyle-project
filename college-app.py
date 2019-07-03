@@ -23,7 +23,6 @@ print(" ") # source https://stackoverflow.com/questions/13872049/print-empty-lin
 print("Welcome to 'Real Talk' College Search. This tool allows you to find a school that what aligns with you on what matters most...and tells you if it's realistic.")
 print(" ")
 school_search =input("Are you looking to evaluate a specific school? Please enter 'Yes' or 'No': ")
-print(" ")
 if school_search == 'Yes':
     school_name = input("Please enter the name of the college you are looking to evaluate: ")
     requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name={school_name}&school.main_campus=1&school.operating=1&_fields=school.name,school.school_url,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
@@ -36,7 +35,10 @@ else:
 #Defining user restrictions
 # emoji credit to https://stackoverflow.com/questions/40446784/display-emoji-in-pythons-console and https://www.geeksforgeeks.org/python-program-to-print-emojis/
 print(" ")
-print("Awesome! Please help us determine if this school is a realistic fit for you.")
+if school_search == 'Yes':
+    print("Awesome! Please help us determine if this school is a realistic fit for you.")
+else:
+    print("Let's roll the dice and see what we find!")
 print(" ")
 student_state = input("What state do you live in? Please use a state abbreviation like 'NY': ")
 print(" ")
@@ -95,9 +97,9 @@ if school_search == 'Yes':
     pass
 else:
     random_school = random.choice(results_list)
-    print(random_school)
+    #print(random_school)
     school_name = random_school['school.name']
-    print(school_name)
+    #print(school_name)
     requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name={school_name}&school.main_campus=1&school.operating=1&_fields=school.name,school.school_url,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
     response = requests.get(requests_url)
     if response.status_code != 200:
@@ -123,54 +125,70 @@ if student_state == parsed_response['results'][0]['school.state']:
 else:
     tuition = parsed_response['results'][0]['latest.cost.tuition.out_of_state']
 
-if float(tuition) > float(budget_amount):
-    print("YEARLY TUITION:" + " " + str(to_usd(float(tuition)))+ " " + "This school is outside of your budget." + " " + emoji.emojize(":worried_face:"))
-elif float(tuition) <= float(budget_amount):
-    print("YEARLY TUITION:" + " " + str(to_usd(float(tuition)))+ " " + " " + emoji.emojize(":money_with_wings:"))
-else:
+if tuition == None:
     pass
+else:
+    if float(tuition) > float(budget_amount):
+        print("YEARLY TUITION:" + " " + str(to_usd(float(tuition)))+ " " + "This school is outside of your budget." + " " + emoji.emojize(":worried_face:"))
+    elif float(tuition) <= float(budget_amount):
+        print("YEARLY TUITION:" + " " + str(to_usd(float(tuition)))+ " " + "This school is in budget! " + emoji.emojize(":money_with_wings:"))
+    else:
+        pass
 
 avg_SAT_score = int(parsed_response['results'][0]['latest.admissions.sat_scores.average.overall'])
 
-if avg_SAT_score > (int(SAT_score) + 50):
-    print("AVERAGE SAT SCORE:" + " " + str(avg_SAT_score)+ " " + "You might want to take that test again..." + " " + emoji.emojize(":grimacing_face:"))
-elif avg_SAT_score <= (int(SAT_score) + 50):
-    print("AVERAGE SAT SCORE:" + " " + str(avg_SAT_score) + " " + "(Worth a shot!)" + " " + emoji.emojize(":relieved_face:"))
-else:
+if SAT_score == None:
     pass
+else:
+    if avg_SAT_score > (int(SAT_score) + 50):
+        print("AVERAGE SAT SCORE:" + " " + str(avg_SAT_score)+ " " + "You might want to take that test again..." + " " + emoji.emojize(":grimacing_face:"))
+    elif (int(SAT_score) - 50) <= avg_SAT_score <= (int(SAT_score) + 50):
+        print("AVERAGE SAT SCORE:" + " " + str(avg_SAT_score) + " " + "Worth a shot!" + " " + emoji.emojize(":relieved_face:"))
+    else:
+        print("AVERAGE SAT SCORE:" + " " + str(avg_SAT_score) + " " + "You got this!" + " " + emoji.emojize(":relieved_face:"))
+
 print("-------------------------")
 print("THINGS TO NOTE:")
 #Giving feedback on the diversity of the institution
-
-percent_female = float(parsed_response['results'][0]['latest.student.demographics.female_share'])
-percent_female_modified = percent_female * 100
-
-if percent_female > float(avg_percent_female):
-    print("PERCENT FEMALE:" + " " + str(round(percent_female_modified,2))+ "% " + "Large female population at this school." + " " + emoji.emojize(":woman:"))
-elif 0.5 <= percent_female <= float(avg_percent_female):
-    print("PERCENT FEMALE:" + " " + str(round(percent_female_modified,2))+ "% " + "Average sized female population at this school." + " " + emoji.emojize(":woman:"))
+if parsed_response['results'][0]['latest.student.demographics.female_share'] == None:
+    pass
 else:
-    print("PERCENT FEMALE:" + " " + str(round(percent_female_modified,2))+ "% " + "Small female population at this school." + " " + emoji.emojize(":thumbs_down:"))
+    percent_female = float(parsed_response['results'][0]['latest.student.demographics.female_share'])
+    percent_female_modified = percent_female * 100
 
-percent_white= float(parsed_response['results'][0]['latest.student.demographics.race_ethnicity.white_2000'])
-percent_white_modified = percent_white * 100
+    if percent_female > float(avg_percent_female):
+        print("PERCENT FEMALE:" + " " + str(round(percent_female_modified,2))+ "% " + "Large female population at this school." + " " + emoji.emojize(":woman:"))
+    elif 0.5 <= percent_female <= float(avg_percent_female):
+        print("PERCENT FEMALE:" + " " + str(round(percent_female_modified,2))+ "% " + "Average sized female population at this school." + " " + emoji.emojize(":woman:"))
+    else:
+        print("PERCENT FEMALE:" + " " + str(round(percent_female_modified,2))+ "% " + "Small female population at this school." + " " + emoji.emojize(":thumbs_down:"))
 
-if percent_white > float(avg_percent_white):
-    print("RACIAL & ETHINIC DIVERSITY:" + " " + "This school is not very diverse." + " " + emoji.emojize(":thumbs_down:"))
-elif 0.45 <= percent_white <= float(avg_percent_white):
-    print("RACIAL & ETHINIC DIVERSITY:"  + " " + "This school is moderately diverse." + " " +emoji.emojize(":relieved_face:"))
+if parsed_response['results'][0]['latest.student.demographics.race_ethnicity.white_2000'] == None:
+    pass
 else:
-    print("RACIAL & ETHINIC DIVERSITY:"  + " " + "This school is very diverse." + " " +emoji.emojize(":thumbs_up:"))
+    percent_white= float(parsed_response['results'][0]['latest.student.demographics.race_ethnicity.white_2000'])
+    percent_white_modified = percent_white * 100
 
-percent_first_gen = float(parsed_response['results'][0]['latest.student.demographics.first_generation'])
-percent_first_gen_modified = percent_first_gen * 100
+    if percent_white > float(avg_percent_white):
+        print("RACIAL & ETHINIC DIVERSITY:" + " " + "This school is not very diverse." + " " + emoji.emojize(":thumbs_down:"))
+    elif 0.45 <= percent_white <= float(avg_percent_white):
+        print("RACIAL & ETHINIC DIVERSITY:"  + " " + "This school is moderately diverse." + " " +emoji.emojize(":relieved_face:"))
+    else:
+        print("RACIAL & ETHINIC DIVERSITY:"  + " " + "This school is very diverse." + " " +emoji.emojize(":thumbs_up:"))
 
-if percent_first_gen > float(avg_percent_first_gen):
-    print("PERCENT FIRST GEN:" + " " + str(round(percent_first_gen_modified,2))+ "% "+ "This school has a large population of first generation students." + " " + emoji.emojize(":thumbs_up:"))
-elif 0.2 <= percent_first_gen <= float(avg_percent_first_gen):
-    print("PERCENT FIRST GEN:"  + " " + str(round(percent_first_gen_modified,2))+ "% "+ "This school has an average amount of first generation students." + " " +emoji.emojize(":relieved_face:"))
+
+if parsed_response['results'][0]['latest.student.demographics.first_generation'] == None:
+    pass
 else:
-    print("PERCENT FIRST GEN"  + " " + str(round(percent_first_gen_modified,2))+ "% " +"This school does not have many first generations students." + " " +emoji.emojize(":thumbs_down:"))
+    percent_first_gen = float(parsed_response['results'][0]['latest.student.demographics.first_generation'])
+    percent_first_gen_modified = percent_first_gen * 100
+
+    if percent_first_gen > float(avg_percent_first_gen):
+        print("PERCENT FIRST GEN:" + " " + str(round(percent_first_gen_modified,2))+ "% "+ "This school has a large population of first generation students." + " " + emoji.emojize(":thumbs_up:"))
+    elif 0.2 <= percent_first_gen <= float(avg_percent_first_gen):
+        print("PERCENT FIRST GEN:"  + " " + str(round(percent_first_gen_modified,2))+ "% "+ "This school has an average amount of first generation students." + " " +emoji.emojize(":relieved_face:"))
+    else:
+        print("PERCENT FIRST GEN"  + " " + str(round(percent_first_gen_modified,2))+ "% " +"This school does not have many first generations students." + " " +emoji.emojize(":thumbs_down:"))
 
 if parsed_response['results'][0]['latest.student.demographics.veteran'] == None:
     pass
@@ -185,23 +203,35 @@ else:
     else:
         print("PERCENT VETERAN"  + " " + str(round(percent_vet_modified,2))+ "% " +"This school does not have many veterans." + " " +emoji.emojize(":thumbs_down:"))
 
-print("-------------------------")
-print(" ")
-
-if avg_SAT_score > (int(SAT_score) + 50):
-    print("Looks like you need to get your scores up before applying. Let's try another college!")
-    exit()
-elif float(tuition) > float(budget_amount):
-    apply_anyway = input("This school is too expensive... Apply anyway? Enter 'Yes' or 'No': ")
-    if apply_anyway == 'No':
-        exit()
-    elif apply_anyway == 'Yes':
-        pass
-    else:
-        print("Sorry that is an invalid input. Please try again with 'Yes' or 'No'.")
-        exit()
-else:
+if parsed_response['results'][0]['latest.student.demographics.female_share'] == None:
     pass
+else:
+    print("Sadly no information is available on the LGBTQ community or if the instition is accessible for persons with disabilities. "+emoji.emojize(":crying_face:"))
+    print("-------------------------")
+    print(" ")
+if SAT_score == None:
+    exit()
+else:
+    if avg_SAT_score > (int(SAT_score) + 50):
+        print("Looks like you need to get your scores up before applying. Let's try another college!")
+        exit()
+    else:
+        pass
+if tuition == None:
+    exit()
+else:
+    if float(tuition) > float(budget_amount):
+        apply_anyway = input("This school is too expensive... Apply anyway? Enter 'Yes' or 'No': ")
+        if apply_anyway == 'No':
+            print("Thanks for using the 'Real Talk' College Search App. Hope to see you soon!")
+            exit()
+        elif apply_anyway == 'Yes':
+            pass
+        else:
+            print("Sorry that is an invalid input. Please try again with 'Yes' or 'No'.")
+            exit()
+    else:
+        pass
 
 print(" ")
 get_reminder = input("Can we send you a gentle reminder to apply? Enter your email address to be our best friend or 'No' to break our hearts: ")
@@ -210,11 +240,11 @@ school_url = parsed_response['results'][0]['school.school_url']
 
 # source: https://github.com/prof-rossetti/nyu-info-2335-201905/blob/master/exercises/emails-with-templates/send_email.py
 if get_reminder == 'No':
-    print("Hope to see you soon!")
+    print("Thanks for using the 'Real Talk' College Search App. Hope to see you soon!")
     exit()
 else:
     client = SendGridAPIClient(SENDGRID_API_KEY) #> <class 'sendgrid.sendgrid.SendGridAPIClient>
-    print("CLIENT:", type(client))
+    #print("CLIENT:", type(client))
     subject = f"Your Gentle Reminder...Apply to {school_name}!"
     html_content = f"Hey there! Just a friendly reminder to apply to {school_name}. The application can be found here: {school_url}. You got this!"
     #print("HTML:", html_content)
@@ -226,14 +256,18 @@ else:
         html_content=html_content)
     try:
         response = client.send(message)
+        print(" ")
+        print("Email sent! Thanks for using the 'Real Talk' College Search App.")
+        print(" ")
 
-        print("RESPONSE:", type(response)) #> <class 'python_http_client.client.Response'>
+        #print("RESPONSE:", type(response)) #> <class 'python_http_client.client.Response'>
         print(response.status_code) #> 202 indicates SUCCESS
-        print(response.body)
-        print(response.headers)
+        #print(response.body)
+        #print(response.headers)
 
     except Exception as e:
         print("OOPS", e.message)
+    
 
 
 
