@@ -28,7 +28,7 @@ if school_search == 'Yes':
     school_name = input("Please enter the name of the college you are looking to evaluate: ")
     requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name={school_name}&school.main_campus=1&school.operating=1&_fields=school.name,school.school_url,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
 elif school_search == 'No': #remove school name as an input in url
-    requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&_per_page=1000&school.main_campus=1&school.operating=1&_fields=school.name"
+    requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&_per_page=5500&school.main_campus=1&school.operating=1&latest.student.size__range=1000..100000&_fields=school.name"
 else:
     print("That input is not valid. Please try again with 'Yes' or 'No'.")
     exit()
@@ -158,7 +158,7 @@ percent_white_modified = percent_white * 100
 if percent_white > float(avg_percent_white):
     print("RACIAL & ETHINIC DIVERSITY:" + " " + "This school is not very diverse." + " " + emoji.emojize(":thumbs_down:"))
 elif 0.45 <= percent_white <= float(avg_percent_white):
-    print("RACIAL & ETHINIC DIVERSITY:"  + " " + "This school is moderately diverse." + " " +emoji.emojize(":relieved_smile:"))
+    print("RACIAL & ETHINIC DIVERSITY:"  + " " + "This school is moderately diverse." + " " +emoji.emojize(":relieved_face:"))
 else:
     print("RACIAL & ETHINIC DIVERSITY:"  + " " + "This school is very diverse." + " " +emoji.emojize(":thumbs_up:"))
 
@@ -220,7 +220,7 @@ else:
     #print("HTML:", html_content)
     #print(get_reminder)
     message = Mail(
-        from_email='sarah.lazun@gmail.com', 
+        from_email='sarah.lazun@gmail.com', #this would not work using the .env variable. had to hard code the email that goes with the API key...
         to_emails=get_reminder, 
         subject=subject, 
         html_content=html_content)
