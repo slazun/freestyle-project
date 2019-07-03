@@ -19,9 +19,11 @@ SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
 MY_ADDRESS = os.environ.get("MY_EMAIL_ADDRESS")
 
 #introducing app to the user. leaarn if they are evaluating a college or searchong for one
-
-print("Welcome to the 'Real Talk' College Evaluator. This tool allows you to find a school that what aligns with you on what matters most...and tells you if it's realistic.")
+print(" ") # source https://stackoverflow.com/questions/13872049/print-empty-line/22534622
+print("Welcome to 'Real Talk' College Search. This tool allows you to find a school that what aligns with you on what matters most...and tells you if it's realistic.")
+print(" ")
 school_search =input("Are you looking to evaluate a specific school? Please enter 'Yes' or 'No': ")
+print(" ")
 if school_search == 'Yes':
     school_name = input("Please enter the name of the college you are looking to evaluate: ")
     requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name={school_name}&school.main_campus=1&school.operating=1&_fields=school.name,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
@@ -33,11 +35,13 @@ else:
 
 #Defining user restrictions
 # emoji credit to https://stackoverflow.com/questions/40446784/display-emoji-in-pythons-console and https://www.geeksforgeeks.org/python-program-to-print-emojis/
-
-print("Awesome! Please help us determine if this is a realistic fit for you.")
-student_state = input("What state do you live in? Please use a state abbreviation like 'PA': ")
-
+print(" ")
+print("Awesome! Please help us determine if this school is a realistic fit for you.")
+print(" ")
+student_state = input("What state do you live in? Please use a state abbreviation like 'NY': ")
+print(" ")
 budget = input("Do you have a budget restriction? Please enter 'Yes' or 'No': ") 
+print(" ")
 if budget == 'Yes':
     budget_amount = input("Please input a max yearly tuition amount like '50000': ") #TODO make tuition number user friendly
 elif budget == 'No':
@@ -46,7 +50,7 @@ elif budget == 'No':
 else:
     print("Sorry that is an invalid input. Please try again with 'Yes' or 'No'.")
     exit()
-
+print(" ")
 SAT_score = input("What is your SAT score out of 1600? If you don't mind me asking... : ")
 
 if int(SAT_score) <= 1600:
@@ -66,8 +70,8 @@ avg_percent_veteran = 0.04 #source https://www.acenet.edu/the-presidency/columns
 #restrict api call to eligible colleges in the url parameters. restrict the number of fields returned 
 #requests_url = f"https://api.data.gov/ed/collegescorecard/v1/schools?api_key={api_key}&school.name={school_name}&school.main_campus=1&school.operating=1&_fields=school.name,school.city,school.state,latest.student.size,latest.admissions.sat_scores.average.overall,latest.cost.tuition.in_state,latest.cost.tuition.out_of_state,latest.aid.median_debt_suppressed.completers.overall,latest.student.demographics.female_share,latest.student.demographics.race_ethnicity.white_2000,latest.student.demographics.first_generation,latest.student.demographics.veteran"
 response = requests.get(requests_url)
-print(type(response)) #<class 'requests.models.Response'> its a string and need to use json module to treat as dictionary
-print(response.status_code)
+#print(type(response)) #<class 'requests.models.Response'> its a string and need to use json module to treat as dictionary
+#print(response.status_code)
 #print(response.text)
 if response.status_code != 200:
     print("Sorry we have encountered an error with the data request. Please try again.")
@@ -75,19 +79,18 @@ if response.status_code != 200:
 
 #move code over from api_data python code to evaluate results
 parsed_response = json.loads(response.text) #parsing string to dictionary
-parsed_response = json.loads(response.text) #parsing string to dictionary
-print(type(parsed_response)) #class dict
+#print(type(parsed_response)) #class dict
 my_keys = parsed_response.keys() #to do: sort to ensure latest date is first
 tables = list(my_keys) #need to referen
-print(tables) 
-print(type(parsed_response['results'])) #list
-print(parsed_response['results'][0]) 
-print(type(parsed_response['results'][0])) #dictionary 
+#print(tables) 
+#print(type(parsed_response['results'])) #list
+#print(parsed_response['results'][0]) 
+#print(type(parsed_response['results'][0])) #dictionary 
 
 #Output for single college search. Basic Info. Source credit: robo advisor project
 
 print("-------------------------")
-print(THE BASICS:)
+print("THE BASICS:")
 print("POTENTIAL COLLEGE:" + " " + str(school_name))
 print("COLLEGE LOCATION:"+ " " + str(parsed_response['results'][0]['school.city'])+ ", " +str(parsed_response['results'][0]['school.state']))
 print("STUDENT POPULATION SIZE:" + " " + str(parsed_response['results'][0]['latest.student.size']))
@@ -112,7 +115,7 @@ avg_SAT_score = int(parsed_response['results'][0]['latest.admissions.sat_scores.
 if avg_SAT_score > (int(SAT_score) + 50):
     print("AVERAGE SAT SCORE:" + " " + str(avg_SAT_score)+ " " + "You might want to take that test again..." + " " + emoji.emojize(":grimacing_face:"))
 elif avg_SAT_score <= (int(SAT_score) + 50):
-    print("AVERAGE SAT SCORE:" + " " + str(avg_SAT_score) + " " + "Worth a shot!" + " " + emoji.emojize(":relieved_face:"))
+    print("AVERAGE SAT SCORE:" + " " + str(avg_SAT_score) + " " + "(Worth a shot!)" + " " + emoji.emojize(":relieved_face:"))
 else:
     pass
 print("-------------------------")
@@ -163,6 +166,24 @@ else:
         print("PERCENT VETERAN"  + " " + str(round(percent_vet_modified,2))+ "% " +"This school does not have many veterans." + " " +emoji.emojize(":thumbs_down:"))
 
 print("-------------------------")
+print(" ")
 
+if avg_SAT_score > (int(SAT_score) + 50):
+    print("Looks like you need to get your scores up before applying. Let's try another college!")
+elif float(tuition) > float(budget_amount):
+    apply_anyway = input("This school is too exspensive... Apply anyway? Enter 'Yes' or 'No': ")
+        if apply_anyway == 'No':
+            exit()
+        elif apply_anyway == 'Yes':
+            pass
+        else:
+            print("Sorry that is an invalid input. Please try again with 'Yes' or 'No'.")
+            exit()
+else:
+    pass
+
+
+
+#
 
 
