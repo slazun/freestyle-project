@@ -218,7 +218,7 @@ else:
     else:
         pass
 if tuition == None:
-    exit()
+    pass
 else:
     if float(tuition) > float(budget_amount):
         apply_anyway = input("This school is too expensive... Apply anyway? Enter 'Yes' or 'No': ")
