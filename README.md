@@ -1,6 +1,6 @@
 # The 'Real Talk' College Search App
 
-The goal of this project is to build a Python based application that uses real-time data from an API to assess stock prices and provide recommendations about whether to buy or sell. 
+The goal of this project is to build a Python based application that combines college enrollment data from an API with user inputs to provide recommendations on whether or not a potential student is a good fit for a school. This app hopes to help potential students take ownership of their college searches by providing them a fun tool to get information and an honest point of view on whether or not they're qualified to attend a school. 
 
 ## Setting up Your Repository
 
@@ -23,7 +23,7 @@ pip install sendgrid==6.0.5
 pip install emojis
 ```
 
-Now, from within the environment you should be able to execute (from the command-line) the Python script found in the "robo-advisor.py" file: 
+Now, from within the environment you should be able to execute (from the command-line) the Python script found in the "college-app.py" file: 
 
 ```
 python college-app.py
@@ -103,6 +103,10 @@ This app contains the functionality to send an email to the user that serves as 
 The SENDGRID_API_KEY variable is referenced in the college-app.py file, and your key will be pulled into the application to run it without displaying the key. 
 
 In order to send the email, you will have to adjust the "from_email" variable in your code to the email associated with your SendGrid API. 
+
+## Additional Info
+
+There is another .py file in this repo called "api_data.py." This file is not necessary to run the app, but provides some basic code to better understand the data coming through the API. 
 
 Have fun! 
 
