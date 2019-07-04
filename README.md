@@ -1,4 +1,4 @@
-#The 'Real Talk' College Search App
+# The 'Real Talk' College Search App
 
 The goal of this project is to build a Python based application that uses real-time data from an API to assess stock prices and provide recommendations about whether to buy or sell. 
 
